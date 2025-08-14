@@ -1,6 +1,7 @@
 
 using Catalogo.Api.Models;
 using Catalogo.Api.repositories.Abstractions;
+using Catalogo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -8,26 +9,27 @@ namespace Catalogo.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProdutoController(IRepositoryData _data) : ControllerBase
+public class ProdutoController(MongoDbService service) : ControllerBase
 {
     
-    [HttpGet]
+   [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var lista = await _data.GetAllAsync();
+        var lista = await service.GetAllAsync();
         return Ok(lista);
     }
      
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var data = await _data.GetByIdAsync(id);
+        var data = await service.GetByIdAsync(id);
         return data == null ? NotFound() : Ok(data);
     }
+    
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Data data)
     {
-        await _data.AddAsync(data);
-        return CreatedAtAction(nameof(Get), new { id = data.Id }, data);
+        await service.SaveData(data);
+        return Ok( data);
     }
 }
